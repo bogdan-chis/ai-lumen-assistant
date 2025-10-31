@@ -1,0 +1,1 @@
+print("Main point of the application")

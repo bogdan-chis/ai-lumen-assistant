@@ -1,0 +1,6 @@
+opencv-python
+numpy
+paddleocr
+vosk
+pyttsx3
+sentence-transformers
