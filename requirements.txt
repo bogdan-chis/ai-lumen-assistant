@@ -1,6 +1,10 @@
 opencv-python
 numpy
 paddleocr
-vosk
-pyttsx3
+paddlepaddle==2.6.1
+protobuf==3.20.2
 sentence-transformers
+pyttsx3
+vosk
+openai>=1.40.0
+tiktoken
