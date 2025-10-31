@@ -1,17 +1,21 @@
 import cv2
+import os
 
-def open_stream(src=0):
-    cap = cv2.VideoCapture(src)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 840)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 840)
+def open_video(path: str):
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Video not found: {path}")
+    cap = cv2.VideoCapture(path)
+    if not cap.isOpened():
+        raise RuntimeError(f"Failed to open video: {path}")
     return cap
 
 def read_frame(cap):
     ok, frame = cap.read()
-    if not ok: return None
+    if not ok:
+        return None
     return frame
 
-def is_usable(frame, blur_thresh=80):
+def is_usable(frame, blur_thresh: float = 80.0):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     var = cv2.Laplacian(gray, cv2.CV_64F).var()
     return var >= blur_thresh

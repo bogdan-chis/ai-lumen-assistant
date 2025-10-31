@@ -1,17 +1,37 @@
-from sentence_transformers import SentenceTransformer, util
+# No TF/Transformers. Pure scikit-learn.
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-_model = SentenceTransformer("all-MiniLM-L6-v2")
-_emb_cache = {}
+class TfidfRetriever:
+    def __init__(self):
+        self.texts = []
+        self.vectorizer = None
+        self.matrix = None
 
-def embed(text):
-    if text in _emb_cache: return _emb_cache[text]
-    _emb_cache[text] = _model.encode(text, normalize_embeddings=True)
-    return _emb_cache[text]
+    def build(self, texts):
+        # texts: list[str]
+        self.texts = texts[:]
+        self.vectorizer = TfidfVectorizer(
+            strip_accents="unicode",
+            lowercase=True,
+            ngram_range=(1,2),
+            max_features=20000
+        )
+        self.matrix = self.vectorizer.fit_transform(self.texts)
+
+    def query(self, q, k=5):
+        if not self.texts:
+            return []
+        qv = self.vectorizer.transform([q])
+        sims = cosine_similarity(qv, self.matrix).ravel()
+        idx = sims.argsort()[::-1][:k]
+        return [self.texts[i] for i in idx if sims[i] > 0]
+
+# simple module-level instance
+_retriever = TfidfRetriever()
 
 def retrieve(query, corpus_texts, k=5):
-    if not corpus_texts: return []
-    q = embed(query)
-    cs = [embed(t) for t in corpus_texts]
-    sims = util.cos_sim(q, cs).tolist()[0]
-    ranked = sorted(zip(corpus_texts, sims), key=lambda x: x[1], reverse=True)
-    return [t for t,_ in ranked[:k]]
+    # rebuild if corpus changed size
+    if _retriever.matrix is None or len(corpus_texts) != len(_retriever.texts):
+        _retriever.build(corpus_texts)
+    return _retriever.query(query, k=k)

@@ -1,13 +1,21 @@
-from paddleocr import PaddleOCR
+from rapidocr_onnxruntime import RapidOCR
 
-_ocr_det = PaddleOCR(use_angle_cls=True, det=True, rec=False, lang='en')
+# Force CUDA first, then CPU fallback
+_rapid = RapidOCR(providers=["CUDAExecutionProvider", "CPUExecutionProvider"], text_score=0.5)
 
 def detect_boxes(img):
-    result = _ocr_det.ocr(img, det=True, rec=False)
-    # Flatten and return boxes as x1,y1,x2,y2...
+    result, _ = _rapid(img)
     boxes = []
-    for line in result:
-        for (poly, _) in line:
-            xs = [p[0] for p in poly]; ys = [p[1] for p in poly]
-            boxes.append((int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys))))
+    for (box, txt, score) in result or []:
+        xs = [int(p[0]) for p in box]; ys = [int(p[1]) for p in box]
+        boxes.append((min(xs), min(ys), max(xs), max(ys)))
     return boxes
+
+def get_full_ocr(img):
+    result, _ = _rapid(img)
+    items = []
+    for (box, txt, score) in result or []:
+        xs = [int(p[0]) for p in box]; ys = [int(p[1]) for p in box]
+        items.append({"box": (min(xs), min(ys), max(xs), max(ys)),
+                      "text": txt, "conf": float(score)})
+    return items

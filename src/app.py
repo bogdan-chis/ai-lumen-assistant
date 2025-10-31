@@ -1,4 +1,4 @@
-from .capture import open_stream, read_frame, is_usable
+from .capture import open_video, read_frame, is_usable
 from .detect_text import detect_boxes
 from .ocr import ocr_crops
 from .layout import summarize
@@ -9,15 +9,20 @@ from .tts import speak
 from .ui import draw_boxes
 import cv2
 
-def run(video=0, auto_read_short=True):
-    cap = open_stream(video)
+def run(video_path: str, auto_read_short=True, visualize=True):
+    cap = open_video(video_path)
     mem = Timeline()
+
     while True:
         frame = read_frame(cap)
-        if frame is None: break
-        if not is_usable(frame): 
-            cv2.imshow("view", frame)
-            if cv2.waitKey(1) == 27: break
+        if frame is None:
+            break  # EOF
+
+        if not is_usable(frame):
+            if visualize:
+                cv2.imshow("view", frame)
+                if (cv2.waitKey(1) & 0xFF) in (27, ord('q')):
+                    break
             continue
 
         boxes = detect_boxes(frame)
@@ -26,12 +31,19 @@ def run(video=0, auto_read_short=True):
 
         if auto_read_short and items:
             s = summarize(items, max_len=120)
-            if s: speak(s)
+            if s:
+                speak(s)
 
-        vis = draw_boxes(frame, items)
-        cv2.imshow("view", vis)
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q') or key == 27: break
-        if key == ord('a'):  # ask last question over memory
-            resp = answer("What is the expiry date?", retrieve("expiry date", mem.get_corpus()))
-            speak(resp)
+        if visualize:
+            vis = draw_boxes(frame, items)
+            cv2.imshow("view", vis)
+            key = cv2.waitKey(1) & 0xFF
+            if key in (27, ord('q')):
+                break
+            if key == ord('a'):
+                resp = answer("What is the expiry date?", retrieve("expiry date", mem.get_corpus()))
+                speak(resp)
+
+    cap.release()
+    if visualize:
+        cv2.destroyAllWindows()
