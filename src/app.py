@@ -6,7 +6,6 @@ from .memory import Timeline
 from .rag import retrieve
 from .llm import answer
 from .tts import speak
-from .ui import draw_boxes
 import cv2
 from .detect_text import get_full_ocr
 from .ui import draw_items
