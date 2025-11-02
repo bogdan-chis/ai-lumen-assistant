@@ -1,5 +1,3 @@
-# detect_text.py  — EasyOCR backend (GPU if available)
-
 import cv2
 import numpy as np
 import torch
@@ -7,8 +5,7 @@ import easyocr
 
 # Use GPU if available; otherwise CPU.
 _GPU = torch.cuda.is_available()
-# Load once. Add more langs if needed, e.g., ['en', 'ro', 'de'].
-_reader = easyocr.Reader(['ro'], gpu=_GPU)  # detector='craft' is default
+_reader = easyocr.Reader(['ro'], gpu=_GPU)
 
 def _to_xyxy(bbox):
     # bbox: 4 points [[x,y], ...] -> (x1,y1,x2,y2)
