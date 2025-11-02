@@ -1,7 +1,11 @@
 import pyttsx3
 
-_engine = pyttsx3.init()
-
-def speak(text):
-    _engine.say(text)
-    _engine.runAndWait()
+def speak_ro(text):
+    engine = pyttsx3.init()
+    engine.setProperty("rate", 170)
+    engine.setProperty(
+        "voice",
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\MSTTS_V110_roRO_Andrei"
+    )
+    engine.say(text)
+    engine.runAndWait()
