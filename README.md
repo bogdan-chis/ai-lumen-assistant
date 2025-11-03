@@ -15,6 +15,12 @@ Runs **offline** with **EasyOCR** and a **local LLM via LM Studio**.
 * 🤖 Local LLM with **LM Studio** (OpenAI-compatible API)
 
 ---
+## 📥 Get LM Studio
+
+* Download LM Studio here: https://lmstudio.ai/
+* Then load a chat model and start the local server.
+
+---
 
 ## 📁 Project layout
 
